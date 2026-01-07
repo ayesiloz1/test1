@@ -1,0 +1,36 @@
+
+======================================================================
+RIAWELC DATASET PREPROCESSING SUMMARY
+======================================================================
+
+Dataset: Welding Defect Classification
+Classes: CR (Crack), LP (Lack of Penetration), ND (No Defect), PO (Porosity)
+
+DATASET STATISTICS:
+======================================================================
+Class  Training  Validation  Testing  Total
+   CR      3225        1240      497   4962
+   LP      1880         723      290   2893
+   ND      2535         975      390   3900
+   PO      2670        1027      411   4108
+
+Total Images: 15863
+  - Training: 10310 (65.0%)
+  - Validation: 3965 (25.0%)
+  - Testing: 1588 (10.0%)
+
+IMAGE PROPERTIES:
+======================================================================
+Width Range: 227 - 227 px
+Height Range: 227 - 227 px
+Mean Width: 227 px
+Mean Height: 227 px
+
+QUALITY CHECKS:
+======================================================================
+Total images checked: 15863
+Issues found: 0
+Status: PASSED ✓
+
+Generated: 2026-01-06 19:25:57
+======================================================================
