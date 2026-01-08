@@ -31,5 +31,38 @@ models/*.pt
 # OS
 .DS_Store
 Thumbs.db
+# Dataset folder (too large for git)
+dataset/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# Model files (large)
+models/*.pth
+models/*.pt
+!models/.gitkeep
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
 
 /gradcam_outputs/
