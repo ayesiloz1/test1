@@ -31,3 +31,5 @@ models/*.pt
 # OS
 .DS_Store
 Thumbs.db
+
+/gradcam_outputs/
