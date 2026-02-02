@@ -21,7 +21,7 @@ from sklearn.metrics import (
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from model import CAE, CAELarge
+from model import CAE, CAELarge, CAESmall, CAETiny
 from dataset import AnomalyDataset, get_transforms, denormalize
 
 
@@ -34,9 +34,13 @@ def load_model(model_path, device):
     latent_dim = config.get('latent_dim', 128)
     model_type = config.get('model_type', 'standard')
     
-    # Create model
+    # Create model based on type
     if model_type == 'large':
         model = CAELarge(latent_dim=latent_dim)
+    elif model_type == 'small':
+        model = CAESmall(latent_dim=min(latent_dim, 64))
+    elif model_type == 'tiny':
+        model = CAETiny(latent_dim=min(latent_dim, 32))
     else:
         model = CAE(latent_dim=latent_dim)
     
@@ -44,7 +48,7 @@ def load_model(model_path, device):
     model.to(device)
     model.eval()
     
-    threshold = checkpoint.get('threshold', 0.001)
+    threshold = checkpoint.get('threshold', 0.00001)
     
     print(f"Model loaded from: {model_path}")
     print(f"  Model type: {model_type}")
@@ -368,19 +372,25 @@ def save_all_visualizations(model, test_loader, threshold, output_dir, device):
                 axes[1].set_title('Reconstructed', fontsize=12)
                 axes[1].axis('off')
                 
-                # Error heatmap (normalized per-image)
+                # Error heatmap with enhanced visualization
                 error_map = errors[i].cpu().numpy()
                 error_min = error_map.min()
                 error_max = error_map.max()
                 if error_max > error_min:
                     error_map_norm = (error_map - error_min) / (error_max - error_min)
                 else:
-                    error_map_norm = error_map
+                    error_map_norm = np.zeros_like(error_map)
                 
-                im = axes[2].imshow(error_map_norm, cmap='hot', vmin=0, vmax=1)
+                # Apply gamma correction to enhance visibility (gamma < 1 brightens)
+                gamma = 0.5
+                error_map_enhanced = np.power(error_map_norm, gamma)
+                
+                # Create overlay: original image with heatmap on top
+                axes[2].imshow(img_np)
+                im = axes[2].imshow(error_map_enhanced, cmap='jet', alpha=0.6, vmin=0, vmax=1)
                 status = "ANOMALY" if is_anomaly else "NORMAL"
                 color = "red" if is_anomaly else "green"
-                axes[2].set_title(f'Anomaly Map\nError: {error_value:.6f} [{status}]', 
+                axes[2].set_title(f'Anomaly Overlay\nError: {error_value:.6f} [{status}]', 
                                   fontsize=11, color=color)
                 axes[2].axis('off')
                 
@@ -402,6 +412,114 @@ def save_all_visualizations(model, test_loader, threshold, output_dir, device):
     print(f"\nAll visualizations saved to: {output_dir}")
 
 
+def save_samples_per_class(model, test_loader, threshold, output_dir, device, num_samples=10):
+    """
+    Save N samples from each class (CR, LP, ND, PO) with original/reconstructed/heatmap.
+    """
+    output_dir = Path(output_dir)
+    
+    # Create subclass folders
+    for subclass in ['CR', 'LP', 'ND', 'PO']:
+        (output_dir / subclass).mkdir(parents=True, exist_ok=True)
+    
+    # Track how many saved per class
+    saved_counts = {'CR': 0, 'LP': 0, 'ND': 0, 'PO': 0}
+    
+    model.eval()
+    
+    print(f"\nSaving {num_samples} samples per class to {output_dir}/...")
+    
+    with torch.no_grad():
+        for images, labels, defect_types, paths in tqdm(test_loader, desc="Processing"):
+            # Check if we have enough for all classes
+            if all(c >= num_samples for c in saved_counts.values()):
+                break
+                
+            images = images.to(device)
+            reconstructions = model(images)
+            
+            # Compute per-pixel error
+            errors = torch.mean((images - reconstructions) ** 2, dim=1)  # (B, H, W)
+            
+            # Denormalize for visualization
+            images_vis = denormalize(images.cpu())
+            recon_vis = denormalize(reconstructions.cpu())
+            recon_vis = torch.clamp(recon_vis, 0, 1)
+            
+            # Compute scalar error for each image
+            scalar_errors = torch.mean(errors, dim=[1, 2]).cpu().numpy()
+            
+            for i in range(len(images)):
+                defect_type = defect_types[i]
+                
+                # Skip if we already have enough of this class
+                if saved_counts[defect_type] >= num_samples:
+                    continue
+                
+                img_path = Path(paths[i])
+                img_name = img_path.stem
+                error_value = scalar_errors[i]
+                is_anomaly = error_value > threshold
+                
+                # Create figure with 3 subplots side by side
+                fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+                
+                # Original
+                img_np = images_vis[i].permute(1, 2, 0).numpy()
+                img_np = np.clip(img_np, 0, 1)
+                axes[0].imshow(img_np)
+                axes[0].set_title(f'Original ({defect_type})', fontsize=12)
+                axes[0].axis('off')
+                
+                # Reconstruction
+                recon_np = recon_vis[i].permute(1, 2, 0).numpy()
+                recon_np = np.clip(recon_np, 0, 1)
+                axes[1].imshow(recon_np)
+                axes[1].set_title('Reconstructed', fontsize=12)
+                axes[1].axis('off')
+                
+                # Error heatmap with enhanced visualization
+                error_map = errors[i].cpu().numpy()
+                error_min = error_map.min()
+                error_max = error_map.max()
+                if error_max > error_min:
+                    error_map_norm = (error_map - error_min) / (error_max - error_min)
+                else:
+                    error_map_norm = np.zeros_like(error_map)
+                
+                # Apply gamma correction to enhance visibility (gamma < 1 brightens)
+                gamma = 0.5
+                error_map_enhanced = np.power(error_map_norm, gamma)
+                
+                # Create overlay: original image with heatmap on top
+                axes[2].imshow(img_np)
+                im = axes[2].imshow(error_map_enhanced, cmap='jet', alpha=0.6, vmin=0, vmax=1)
+                status = "ANOMALY" if is_anomaly else "NORMAL"
+                color = "red" if is_anomaly else "green"
+                axes[2].set_title(f'Anomaly Overlay\nError: {error_value:.6f} [{status}]', 
+                                  fontsize=11, color=color)
+                axes[2].axis('off')
+                
+                # Add colorbar
+                plt.colorbar(im, ax=axes[2], fraction=0.046, pad=0.04)
+                
+                plt.tight_layout()
+                
+                # Save to appropriate subclass folder
+                save_path = output_dir / defect_type / f'{img_name}.png'
+                plt.savefig(save_path, dpi=100, bbox_inches='tight')
+                plt.close(fig)
+                
+                saved_counts[defect_type] += 1
+    
+    # Report saved counts
+    print(f"\nSaved samples per class:")
+    for subclass in ['CR', 'LP', 'ND', 'PO']:
+        print(f"  {subclass}/: {saved_counts[subclass]} images")
+    
+    print(f"\nVisualizations saved to: {output_dir}")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Test CAE Model')
     parser.add_argument('--model_path', type=str, default='./models/best_cae_model.pth',
@@ -418,8 +536,12 @@ def main():
                         help='Generate visualization plots')
     parser.add_argument('--save_all', action='store_true',
                         help='Save original/reconstructed/heatmap for ALL images by subclass')
+    parser.add_argument('--save_samples', type=int, default=0,
+                        help='Save N samples per class (e.g., --save_samples 10)')
     parser.add_argument('--find_threshold', action='store_true',
                         help='Search for optimal threshold')
+    parser.add_argument('--threshold', type=float, default=None,
+                        help='Override threshold (use optimal from --find_threshold)')
     args = parser.parse_args()
     
     # Device
@@ -428,6 +550,11 @@ def main():
     
     # Load model
     model, threshold, config = load_model(args.model_path, device)
+    
+    # Override threshold if specified
+    if args.threshold is not None:
+        print(f"Using override threshold: {args.threshold:.6f}")
+        threshold = args.threshold
     
     # Use image size from config if available
     image_size = config.get('image_size', args.image_size)
@@ -465,6 +592,10 @@ def main():
     # Save all visualizations by subclass
     if args.save_all:
         save_all_visualizations(model, test_loader, threshold, args.output_dir, device)
+    
+    # Save N samples per class
+    if args.save_samples > 0:
+        save_samples_per_class(model, test_loader, threshold, args.output_dir, device, args.save_samples)
     
     print("\nTest complete!")
 
