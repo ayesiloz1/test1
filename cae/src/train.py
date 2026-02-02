@@ -15,6 +15,7 @@ import argparse
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from pathlib import Path
@@ -25,8 +26,69 @@ from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, f1
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from model import CAE, CAELarge
+from model import CAE, CAELarge, CAESmall, CAETiny
 from dataset import create_dataloaders, denormalize
+
+
+class SSIMLoss(nn.Module):
+    """
+    SSIM (Structural Similarity Index) Loss for better defect localization.
+    SSIM captures structural differences (edges, textures) better than MSE.
+    """
+    def __init__(self, window_size=11, channels=3):
+        super().__init__()
+        self.window_size = window_size
+        self.channels = channels
+        
+        # Create Gaussian window
+        sigma = 1.5
+        gauss = torch.Tensor([np.exp(-(x - window_size//2)**2 / (2 * sigma**2)) 
+                              for x in range(window_size)])
+        gauss = gauss / gauss.sum()
+        
+        # Create 2D kernel
+        kernel = gauss.unsqueeze(1) * gauss.unsqueeze(0)
+        kernel = kernel.expand(channels, 1, window_size, window_size).contiguous()
+        self.register_buffer('window', kernel)
+        
+    def forward(self, img1, img2):
+        """Compute SSIM loss (1 - SSIM) so lower is better."""
+        C1 = 0.01 ** 2
+        C2 = 0.03 ** 2
+        
+        # Compute means
+        mu1 = F.conv2d(img1, self.window, padding=self.window_size//2, groups=self.channels)
+        mu2 = F.conv2d(img2, self.window, padding=self.window_size//2, groups=self.channels)
+        
+        mu1_sq = mu1 ** 2
+        mu2_sq = mu2 ** 2
+        mu1_mu2 = mu1 * mu2
+        
+        # Compute variances and covariance
+        sigma1_sq = F.conv2d(img1 * img1, self.window, padding=self.window_size//2, groups=self.channels) - mu1_sq
+        sigma2_sq = F.conv2d(img2 * img2, self.window, padding=self.window_size//2, groups=self.channels) - mu2_sq
+        sigma12 = F.conv2d(img1 * img2, self.window, padding=self.window_size//2, groups=self.channels) - mu1_mu2
+        
+        # SSIM formula
+        ssim = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / \
+               ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
+        
+        # Return 1 - SSIM as loss (so minimizing loss maximizes SSIM)
+        return 1 - ssim.mean()
+
+
+class CombinedLoss(nn.Module):
+    """Combined MSE + SSIM loss for both pixel accuracy and structural similarity."""
+    def __init__(self, alpha=0.5):
+        super().__init__()
+        self.mse = nn.MSELoss()
+        self.ssim = SSIMLoss()
+        self.alpha = alpha  # Weight for SSIM (0.5 = equal weight)
+        
+    def forward(self, pred, target):
+        mse_loss = self.mse(pred, target)
+        ssim_loss = self.ssim(pred, target)
+        return (1 - self.alpha) * mse_loss + self.alpha * ssim_loss
 
 
 class CAETrainer:
@@ -40,6 +102,10 @@ class CAETrainer:
         # Create model
         if config.model_type == 'large':
             self.model = CAELarge(latent_dim=config.latent_dim).to(self.device)
+        elif config.model_type == 'small':
+            self.model = CAESmall(latent_dim=min(config.latent_dim, 64)).to(self.device)
+        elif config.model_type == 'tiny':
+            self.model = CAETiny(latent_dim=min(config.latent_dim, 32)).to(self.device)
         else:
             self.model = CAE(latent_dim=config.latent_dim).to(self.device)
         
@@ -47,7 +113,15 @@ class CAETrainer:
         print(f"Parameters: {sum(p.numel() for p in self.model.parameters()):,}")
         
         # Loss function
-        self.criterion = nn.MSELoss()
+        if config.loss_type == 'ssim':
+            self.criterion = SSIMLoss().to(self.device)
+            print(f"Loss: SSIM (structural similarity)")
+        elif config.loss_type == 'combined':
+            self.criterion = CombinedLoss(alpha=config.ssim_weight).to(self.device)
+            print(f"Loss: Combined (MSE + SSIM, alpha={config.ssim_weight})")
+        else:
+            self.criterion = nn.MSELoss()
+            print(f"Loss: MSE")
         
         # Optimizer
         self.optimizer = optim.Adam(
@@ -419,10 +493,16 @@ def parse_args():
                         help='Path to CAE dataset')
     
     # Model
-    parser.add_argument('--model_type', type=str, default='standard', choices=['standard', 'large'],
-                        help='Model type: standard or large')
+    parser.add_argument('--model_type', type=str, default='standard', 
+                        choices=['standard', 'large', 'small', 'tiny'],
+                        help='Model type: standard (~886K), large (~2.7M), small (~110K), tiny (~30K)')
     parser.add_argument('--latent_dim', type=int, default=128,
                         help='Latent dimension size')
+    parser.add_argument('--loss_type', type=str, default='mse',
+                        choices=['mse', 'ssim', 'combined'],
+                        help='Loss function: mse, ssim, or combined')
+    parser.add_argument('--ssim_weight', type=float, default=0.5,
+                        help='Weight for SSIM in combined loss (0-1)')
     
     # Training
     parser.add_argument('--epochs', type=int, default=100,
