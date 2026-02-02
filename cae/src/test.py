@@ -313,6 +313,95 @@ def find_best_threshold(results):
     return best_threshold, best_f1
 
 
+def save_all_visualizations(model, test_loader, threshold, output_dir, device):
+    """
+    Save original, reconstructed, and anomaly heatmap side-by-side for ALL images.
+    Organized by subclass folders: results/CR/, results/LP/, results/ND/, results/PO/
+    """
+    output_dir = Path(output_dir)
+    
+    # Create subclass folders
+    for subclass in ['CR', 'LP', 'ND', 'PO']:
+        (output_dir / subclass).mkdir(parents=True, exist_ok=True)
+    
+    model.eval()
+    
+    print(f"\nSaving all visualizations to {output_dir}/[CR,LP,ND,PO]/...")
+    
+    with torch.no_grad():
+        for images, labels, defect_types, paths in tqdm(test_loader, desc="Saving images"):
+            images = images.to(device)
+            reconstructions = model(images)
+            
+            # Compute per-pixel error
+            errors = torch.mean((images - reconstructions) ** 2, dim=1)  # (B, H, W)
+            
+            # Denormalize for visualization
+            images_vis = denormalize(images.cpu())
+            recon_vis = denormalize(reconstructions.cpu())
+            recon_vis = torch.clamp(recon_vis, 0, 1)
+            
+            # Compute scalar error for each image
+            scalar_errors = torch.mean(errors, dim=[1, 2]).cpu().numpy()
+            
+            for i in range(len(images)):
+                defect_type = defect_types[i]
+                img_path = Path(paths[i])
+                img_name = img_path.stem
+                error_value = scalar_errors[i]
+                is_anomaly = error_value > threshold
+                
+                # Create figure with 3 subplots side by side
+                fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+                
+                # Original
+                img_np = images_vis[i].permute(1, 2, 0).numpy()
+                img_np = np.clip(img_np, 0, 1)
+                axes[0].imshow(img_np)
+                axes[0].set_title(f'Original ({defect_type})', fontsize=12)
+                axes[0].axis('off')
+                
+                # Reconstruction
+                recon_np = recon_vis[i].permute(1, 2, 0).numpy()
+                recon_np = np.clip(recon_np, 0, 1)
+                axes[1].imshow(recon_np)
+                axes[1].set_title('Reconstructed', fontsize=12)
+                axes[1].axis('off')
+                
+                # Error heatmap (normalized per-image)
+                error_map = errors[i].cpu().numpy()
+                error_min = error_map.min()
+                error_max = error_map.max()
+                if error_max > error_min:
+                    error_map_norm = (error_map - error_min) / (error_max - error_min)
+                else:
+                    error_map_norm = error_map
+                
+                im = axes[2].imshow(error_map_norm, cmap='hot', vmin=0, vmax=1)
+                status = "ANOMALY" if is_anomaly else "NORMAL"
+                color = "red" if is_anomaly else "green"
+                axes[2].set_title(f'Anomaly Map\nError: {error_value:.6f} [{status}]', 
+                                  fontsize=11, color=color)
+                axes[2].axis('off')
+                
+                # Add colorbar
+                plt.colorbar(im, ax=axes[2], fraction=0.046, pad=0.04)
+                
+                plt.tight_layout()
+                
+                # Save to appropriate subclass folder
+                save_path = output_dir / defect_type / f'{img_name}.png'
+                plt.savefig(save_path, dpi=100, bbox_inches='tight')
+                plt.close(fig)
+    
+    # Count saved files
+    for subclass in ['CR', 'LP', 'ND', 'PO']:
+        count = len(list((output_dir / subclass).glob('*.png')))
+        print(f"  {subclass}/: {count} images saved")
+    
+    print(f"\nAll visualizations saved to: {output_dir}")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Test CAE Model')
     parser.add_argument('--model_path', type=str, default='./models/best_cae_model.pth',
@@ -327,6 +416,8 @@ def main():
                         help='Output directory for results')
     parser.add_argument('--visualize', action='store_true',
                         help='Generate visualization plots')
+    parser.add_argument('--save_all', action='store_true',
+                        help='Save original/reconstructed/heatmap for ALL images by subclass')
     parser.add_argument('--find_threshold', action='store_true',
                         help='Search for optimal threshold')
     args = parser.parse_args()
