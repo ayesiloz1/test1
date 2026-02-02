@@ -60,9 +60,11 @@ class WeldDefectGUI(QMainWindow):
         self.llm_chat = None
         
         # Batch processing
-        self.image_list = []
+        self.image_list = []  # Full list of all images
+        self.filtered_image_list = []  # Filtered list based on class selection
         self.current_image_index = 0
         self.batch_results_cache = {}  # Store results for each image path
+        self.current_class_filter = "All"  # Current class filter
         
         self.initUI()
         self.load_models()
@@ -187,6 +189,21 @@ class WeldDefectGUI(QMainWindow):
         self.btn_next.setEnabled(False)
         nav_layout.addWidget(self.btn_next)
         upload_layout.addLayout(nav_layout)
+        
+        # Class filter dropdown
+        filter_layout = QVBoxLayout()
+        filter_label = QLabel("Filter by Class:")
+        filter_label.setStyleSheet("font-size: 11px; color: #aaa; margin-top: 5px;")
+        filter_layout.addWidget(filter_label)
+        
+        self.combo_class_filter = QComboBox()
+        self.combo_class_filter.addItems(["All", "CR", "LP", "ND", "PO"])
+        self.combo_class_filter.setCurrentText("All")
+        self.combo_class_filter.currentTextChanged.connect(self.filter_images_by_class)
+        self.combo_class_filter.setMinimumHeight(30)
+        self.combo_class_filter.setEnabled(False)
+        filter_layout.addWidget(self.combo_class_filter)
+        upload_layout.addLayout(filter_layout)
         
         # Image counter label
         self.lbl_image_counter = QLabel("No images loaded")
@@ -783,10 +800,16 @@ class WeldDefectGUI(QMainWindow):
             self.image_list = sorted([str(p) for p in self.image_list])
             
             if self.image_list:
+                # Reset filter to "All" and populate filtered list
+                self.current_class_filter = "All"
+                self.combo_class_filter.setCurrentText("All")
+                self.filtered_image_list = self.image_list.copy()
+                
                 self.current_image_index = 0
                 self.load_current_image()
                 self.update_navigation_buttons()
                 self.btn_analyze_all.setEnabled(True)
+                self.combo_class_filter.setEnabled(True)
                 self.log_message(f"Loaded {len(self.image_list)} images from folder")
                 self.status_bar.showMessage(f"Loaded {len(self.image_list)} images")
             else:
@@ -794,9 +817,9 @@ class WeldDefectGUI(QMainWindow):
                 self.log_message("No images found in folder")
     
     def load_current_image(self):
-        """Load and display the current image from the list"""
-        if self.image_list and 0 <= self.current_image_index < len(self.image_list):
-            self.current_image_path = self.image_list[self.current_image_index]
+        """Load and display the current image from the filtered list"""
+        if self.filtered_image_list and 0 <= self.current_image_index < len(self.filtered_image_list):
+            self.current_image_path = self.filtered_image_list[self.current_image_index]
             self.display_image(self.current_image_path)
             self.btn_analyze.setEnabled(True)
             
@@ -813,10 +836,14 @@ class WeldDefectGUI(QMainWindow):
     
     def update_navigation_buttons(self):
         """Update navigation buttons and counter based on current state"""
-        if self.image_list:
+        if self.filtered_image_list:
             self.btn_prev.setEnabled(self.current_image_index > 0)
-            self.btn_next.setEnabled(self.current_image_index < len(self.image_list) - 1)
-            self.lbl_image_counter.setText(f"{self.current_image_index + 1} / {len(self.image_list)}")
+            self.btn_next.setEnabled(self.current_image_index < len(self.filtered_image_list) - 1)
+            # Show filtered count and total count
+            if self.current_class_filter == "All":
+                self.lbl_image_counter.setText(f"{self.current_image_index + 1} / {len(self.filtered_image_list)}")
+            else:
+                self.lbl_image_counter.setText(f"{self.current_image_index + 1} / {len(self.filtered_image_list)} (Class: {self.current_class_filter})")
         else:
             self.btn_prev.setEnabled(False)
             self.btn_next.setEnabled(False)
@@ -839,6 +866,35 @@ class WeldDefectGUI(QMainWindow):
             self.update_navigation_buttons()
             # Display cached results if available
             self.display_cached_results()
+    
+    def filter_images_by_class(self, class_name):
+        """Filter images by selected class"""
+        if not self.image_list:
+            return
+        
+        self.current_class_filter = class_name
+        
+        if class_name == "All":
+            self.filtered_image_list = self.image_list.copy()
+        else:
+            # Filter images that have the class name in their parent folder
+            self.filtered_image_list = [
+                img for img in self.image_list
+                if Path(img).parent.name == class_name
+            ]
+        
+        # Reset to first image in filtered list
+        if self.filtered_image_list:
+            self.current_image_index = 0
+            self.load_current_image()
+            self.update_navigation_buttons()
+            self.display_cached_results()
+            self.log_message(f"Filtered to {len(self.filtered_image_list)} images (Class: {class_name})")
+        else:
+            self.current_image_index = 0
+            self.update_navigation_buttons()
+            self.log_message(f"No images found for class: {class_name}")
+            QMessageBox.information(self, "Filter", f"No images found for class: {class_name}")
     
     def display_cached_results(self):
         """Display cached results for current image if available"""
@@ -1384,14 +1440,34 @@ class WeldDefectGUI(QMainWindow):
             else:
                 return f"DEFECT DETECTED: {pred} ({conf:.1%})", "#ff4444"
         
-        # If autoencoder detected an anomaly
-        if result['autoencoder'] and result['autoencoder']['is_anomaly']:
-            if result['cnn']:
-                pred = result['cnn']['prediction']
-                conf = result['cnn']['confidence']
-                return f"DEFECT DETECTED: {pred} ({conf:.1%})", "#ff4444"
+        # Hybrid mode: Both CNN and Autoencoder
+        if result['cnn'] and result['autoencoder']:
+            pred = result['cnn']['prediction']
+            conf = result['cnn']['confidence']
+            is_anomaly = result['autoencoder']['is_anomaly']
+            
+            # If CNN is confident (>49%), trust the CNN classification
+            if conf > 0.49:
+                if pred == 'ND' and not is_anomaly:
+                    # Both agree: No defect
+                    return "NO DEFECT (NORMAL)", "#44ff44"
+                elif pred == 'ND' and is_anomaly:
+                    # CNN says ND but autoencoder detects anomaly
+                    # Trust CNN since it's confident
+                    return f"NO DEFECT (ND: {conf:.1%}) - AE Flagged", "#ffaa00"
+                else:
+                    # CNN predicts specific defect type (CR, LP, PO)
+                    return f"DEFECT DETECTED: {pred} ({conf:.1%})", "#ff4444"
             else:
-                return "ANOMALY DETECTED", "#ff4444"
+                # CNN is uncertain (<49%), use autoencoder result
+                if is_anomaly:
+                    return f"DEFECT DETECTED (Uncertain: {pred} {conf:.1%})", "#ff4444"
+                else:
+                    return "NO DEFECT (LOW CONFIDENCE)", "#ffaa00"
+        
+        # If only autoencoder detected anomaly (no CNN)
+        if result['autoencoder'] and result['autoencoder']['is_anomaly']:
+            return "ANOMALY DETECTED", "#ff4444"
         
         # Default: no anomaly detected
         return "NO DEFECT (NORMAL)", "#44ff44"
