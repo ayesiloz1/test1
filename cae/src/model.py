@@ -227,6 +227,161 @@ class CAELarge(nn.Module):
         return error, reconstruction
 
 
+class CAESmall(nn.Module):
+    """
+    Smaller/Simpler CAE to avoid overfitting on small datasets.
+    
+    Key differences from CAE:
+    - Fewer filters (16-32-64 vs 32-64-128)
+    - Smaller bottleneck (64 vs 128)
+    - ~110K parameters vs ~886K parameters
+    
+    Use this when the standard CAE reconstructs defects too well.
+    """
+    
+    def __init__(self, in_channels=3, latent_dim=64):
+        super().__init__()
+        
+        self.latent_dim = latent_dim
+        
+        # Encoder - fewer filters
+        self.encoder = nn.Sequential(
+            # 224 -> 112
+            nn.Conv2d(in_channels, 16, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            
+            # 112 -> 56
+            nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            
+            # 56 -> 28
+            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            
+            # Bottleneck: 28 -> 14
+            nn.Conv2d(64, latent_dim, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(latent_dim),
+            nn.ReLU(inplace=True),
+        )
+        
+        # Decoder
+        self.decoder = nn.Sequential(
+            # 14 -> 28
+            nn.ConvTranspose2d(latent_dim, 64, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            
+            # 28 -> 56
+            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            
+            # 56 -> 112
+            nn.ConvTranspose2d(32, 16, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            
+            # 112 -> 224
+            nn.ConvTranspose2d(16, in_channels, kernel_size=4, stride=2, padding=1),
+        )
+    
+    def encode(self, x):
+        return self.encoder(x)
+    
+    def decode(self, z):
+        return self.decoder(z)
+    
+    def forward(self, x):
+        z = self.encode(x)
+        return self.decode(z)
+    
+    def get_reconstruction_error(self, x, reduction='mean'):
+        """Calculate reconstruction error for anomaly detection"""
+        with torch.no_grad():
+            reconstruction = self.forward(x)
+            
+            if reduction == 'mean':
+                error = torch.mean((x - reconstruction) ** 2, dim=[1, 2, 3])
+            elif reduction == 'none':
+                error = torch.mean((x - reconstruction) ** 2, dim=1, keepdim=True)
+            else:
+                raise ValueError(f"Unknown reduction: {reduction}")
+                
+        return error, reconstruction
+
+
+class CAETiny(nn.Module):
+    """
+    Even simpler CAE for very small datasets or extreme overfitting cases.
+    
+    Key features:
+    - Minimal filters (8-16-32)
+    - Very aggressive bottleneck (7x7x32)
+    - ~30K parameters
+    - Forces model to learn only the most essential features
+    """
+    
+    def __init__(self, in_channels=3, latent_dim=32):
+        super().__init__()
+        
+        self.latent_dim = latent_dim
+        
+        # Encoder - minimal filters
+        self.encoder = nn.Sequential(
+            # 224 -> 56 (stride 4)
+            nn.Conv2d(in_channels, 8, kernel_size=7, stride=4, padding=3),
+            nn.BatchNorm2d(8),
+            nn.ReLU(inplace=True),
+            
+            # 56 -> 14
+            nn.Conv2d(8, 16, kernel_size=4, stride=4, padding=0),
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            
+            # 14 -> 7
+            nn.Conv2d(16, latent_dim, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(latent_dim),
+            nn.ReLU(inplace=True),
+        )
+        
+        # Decoder
+        self.decoder = nn.Sequential(
+            # 7 -> 14
+            nn.ConvTranspose2d(latent_dim, 16, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(inplace=True),
+            
+            # 14 -> 56
+            nn.ConvTranspose2d(16, 8, kernel_size=4, stride=4, padding=0),
+            nn.BatchNorm2d(8),
+            nn.ReLU(inplace=True),
+            
+            # 56 -> 224
+            nn.ConvTranspose2d(8, in_channels, kernel_size=7, stride=4, padding=3, output_padding=3),
+        )
+    
+    def forward(self, x):
+        z = self.encoder(x)
+        return self.decoder(z)
+    
+    def get_reconstruction_error(self, x, reduction='mean'):
+        """Calculate reconstruction error for anomaly detection"""
+        with torch.no_grad():
+            reconstruction = self.forward(x)
+            
+            if reduction == 'mean':
+                error = torch.mean((x - reconstruction) ** 2, dim=[1, 2, 3])
+            elif reduction == 'none':
+                error = torch.mean((x - reconstruction) ** 2, dim=1, keepdim=True)
+            else:
+                raise ValueError(f"Unknown reduction: {reduction}")
+                
+        return error, reconstruction
+
+
 if __name__ == "__main__":
     # Test the models
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -253,3 +408,19 @@ if __name__ == "__main__":
     print(f"  Input shape: {x.shape}")
     print(f"  Output shape: {reconstruction.shape}")
     print(f"  Parameters: {sum(p.numel() for p in model_large.parameters()):,}")
+    
+    # Test CAESmall
+    model_small = CAESmall().to(device)
+    reconstruction = model_small(x)
+    print(f"\nCAESmall Model:")
+    print(f"  Input shape: {x.shape}")
+    print(f"  Output shape: {reconstruction.shape}")
+    print(f"  Parameters: {sum(p.numel() for p in model_small.parameters()):,}")
+    
+    # Test CAETiny
+    model_tiny = CAETiny().to(device)
+    reconstruction = model_tiny(x)
+    print(f"\nCAETiny Model:")
+    print(f"  Input shape: {x.shape}")
+    print(f"  Output shape: {reconstruction.shape}")
+    print(f"  Parameters: {sum(p.numel() for p in model_tiny.parameters()):,}")
