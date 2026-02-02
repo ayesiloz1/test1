@@ -462,6 +462,10 @@ def main():
         plot_results(results, args.output_dir)
         visualize_samples(model, test_loader, results, args.output_dir, device)
     
+    # Save all visualizations by subclass
+    if args.save_all:
+        save_all_visualizations(model, test_loader, threshold, args.output_dir, device)
+    
     print("\nTest complete!")
 
 
