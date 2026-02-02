@@ -16,14 +16,14 @@ class GUIConfig:
         
         # Model paths (use absolute paths)
         self.cnn_model_path = self.project_root / 'models' / 'best_model_pytorch.pth'
-        self.autoencoder_model_path = self.project_root / 'autoencoder_models' / 'best_autoencoder.pth'
+        self.autoencoder_model_path = self.project_root / 'cae' / 'models' / 'best_model.pth'
         
         # Detection thresholds
-        self.ae_threshold = 0.005  # Autoencoder reconstruction error threshold
+        self.ae_threshold = 0.018  # CAE reconstruction error threshold (from optimal)
         self.cnn_threshold = 0.5  # CNN confidence threshold
         
-        # Model selection - CNN only by default (SimpleCNN)
-        self.use_autoencoder = False  # Set to True when autoencoder is available
+        # Model selection
+        self.use_autoencoder = True  # Use new CAE model
         self.use_cnn = True
         
         # Processing options

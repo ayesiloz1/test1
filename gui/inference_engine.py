@@ -15,16 +15,17 @@ import time
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent / 'cae' / 'src'))
 
 from train_pytorch import SimpleCNN
 
-# Try to import autoencoder, but make it optional
+# Try to import new CAE models
 try:
-    from autoencoder_src.model import ConvolutionalAutoencoder
+    from model import CAE, CAELarge, CAESmall, CAETiny
     AUTOENCODER_AVAILABLE = True
 except ImportError:
     AUTOENCODER_AVAILABLE = False
-    print("Note: Autoencoder module not found. Using CNN-only mode.")
+    print("Note: CAE module not found. Using CNN-only mode.")
 
 
 class GradCAM:
@@ -138,20 +139,30 @@ class DefectDetectionEngine:
             self.cnn_model = None
             
     def _load_autoencoder(self):
-        """Load autoencoder"""
+        """Load CAE autoencoder"""
         try:
             ae_path = self.config.autoencoder_model_path
             if not Path(ae_path).exists():
-                print(f"Warning: Autoencoder model not found at {ae_path}")
+                print(f"Warning: CAE model not found at {ae_path}")
                 return
                 
             checkpoint = torch.load(ae_path, map_location=self.device, weights_only=False)
             
-            self.autoencoder_model = ConvolutionalAutoencoder(
-                input_channels=checkpoint['config']['input_channels'],
-                latent_dim=checkpoint['config']['latent_dim'],
-                encoder_channels=checkpoint['config']['encoder_channels']
-            )
+            # Get config from checkpoint
+            config = checkpoint.get('config', {})
+            latent_dim = config.get('latent_dim', 128)
+            model_type = config.get('model_type', 'standard')
+            
+            # Create model based on type
+            if model_type == 'large':
+                self.autoencoder_model = CAELarge(latent_dim=latent_dim)
+            elif model_type == 'small':
+                self.autoencoder_model = CAESmall(latent_dim=min(latent_dim, 64))
+            elif model_type == 'tiny':
+                self.autoencoder_model = CAETiny(latent_dim=min(latent_dim, 32))
+            else:
+                self.autoencoder_model = CAE(latent_dim=latent_dim)
+            
             self.autoencoder_model.load_state_dict(checkpoint['model_state_dict'])
             self.autoencoder_model.to(self.device)
             self.autoencoder_model.eval()
@@ -159,10 +170,14 @@ class DefectDetectionEngine:
             # Get threshold from checkpoint
             self.ae_threshold = checkpoint.get('threshold', self.config.ae_threshold)
             
-            print(f"✓ Autoencoder model loaded from {ae_path}")
+            print(f"✓ CAE model loaded from {ae_path}")
+            print(f"  Model type: {model_type}")
+            print(f"  Latent dim: {latent_dim}")
             print(f"  Default threshold: {self.ae_threshold:.6f}")
         except Exception as e:
-            print(f"Error loading Autoencoder: {e}")
+            print(f"Error loading CAE: {e}")
+            import traceback
+            traceback.print_exc()
             self.autoencoder_model = None
             
     def get_transforms(self):
@@ -223,27 +238,41 @@ class DefectDetectionEngine:
         return result
         
     def _predict_autoencoder(self, image_tensor):
-        """Autoencoder anomaly detection"""
+        """CAE anomaly detection with heatmap"""
         with torch.no_grad():
-            error, reconstruction = self.autoencoder_model.get_reconstruction_error(
-                image_tensor, reduction='none'
-            )
+            # Get reconstruction
+            reconstruction = self.autoencoder_model(image_tensor)
             
-            error_value = error.item()
+            # Compute pixel-wise error
+            pixel_error = torch.mean((image_tensor - reconstruction) ** 2, dim=1, keepdim=True)  # (1, 1, H, W)
+            
+            # Compute scalar error (mean across all pixels)
+            error_value = torch.mean(pixel_error).item()
+            
+            # Check if anomaly
             threshold = self.config.ae_threshold or self.ae_threshold
             is_anomaly = error_value > threshold
             
-            # Generate heatmap
-            diff = torch.abs(image_tensor - reconstruction)
-            diff_normalized = diff / (diff.max() + 1e-8)
-            heatmap = diff_normalized.mean(dim=1, keepdim=True)  # Average across channels
+            # Normalize pixel error for visualization
+            pixel_error_normalized = pixel_error.squeeze(0).squeeze(0).cpu().numpy()  # (H, W)
+            error_min = pixel_error_normalized.min()
+            error_max = pixel_error_normalized.max()
+            if error_max > error_min:
+                heatmap_normalized = (pixel_error_normalized - error_min) / (error_max - error_min)
+            else:
+                heatmap_normalized = np.zeros_like(pixel_error_normalized)
+            
+            # Apply gamma correction for better visibility
+            gamma = 0.5
+            heatmap_enhanced = np.power(heatmap_normalized, gamma)
             
             return {
                 'error': error_value,
                 'threshold': threshold,
                 'is_anomaly': is_anomaly,
                 'reconstruction': reconstruction.squeeze(0).cpu(),
-                'heatmap': heatmap.squeeze(0).cpu()
+                'heatmap': heatmap_enhanced,  # (H, W) numpy array normalized to [0, 1]
+                'status': 'ANOMALY' if is_anomaly else 'NORMAL'
             }
             
     def _predict_cnn(self, image_tensor, original_image=None):

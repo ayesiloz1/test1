@@ -6,6 +6,10 @@ Combines CNN Classifier and Autoencoder for comprehensive defect detection
 import sys
 import os
 from pathlib import Path
+
+# IMPORTANT: Import torch BEFORE PyQt5 to avoid DLL conflicts on Windows
+import torch
+
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QFileDialog, QProgressBar, QTextEdit,
@@ -1171,29 +1175,58 @@ class WeldDefectGUI(QMainWindow):
         if self.llm_chat:
             self.llm_chat.set_context(result)
         
-    def display_tensor_image(self, tensor, label):
-        """Convert tensor to QPixmap and display"""
+    def display_tensor_image(self, tensor_or_array, label):
+        """Convert tensor or numpy array to QPixmap and display"""
         try:
             import numpy as np
             import cv2
             
-            # Convert tensor to numpy
-            if len(tensor.shape) == 3:
-                img_array = tensor.permute(1, 2, 0).numpy()
+            # Handle both torch tensors and numpy arrays
+            if hasattr(tensor_or_array, 'cpu'):
+                # It's a torch tensor
+                tensor_or_array = tensor_or_array.cpu()
+                if hasattr(tensor_or_array, 'numpy'):
+                    tensor_or_array = tensor_or_array.numpy()
+            
+            # Now we have a numpy array
+            img_array = tensor_or_array
+            
+            # Handle different shapes
+            if len(img_array.shape) == 3:
+                # (C, H, W) -> (H, W, C)
+                if img_array.shape[0] == 3 or img_array.shape[0] == 1:
+                    img_array = np.transpose(img_array, (1, 2, 0))
+            
+            # Normalize to [0, 255]
+            if img_array.max() <= 1.0:
+                img_array = (img_array * 255).astype(np.uint8)
             else:
-                img_array = tensor.numpy()
-                
-            # Denormalize if needed
-            img_array = (img_array * 255).astype(np.uint8)
+                img_array = img_array.astype(np.uint8)
+            
+            # Ensure contiguous array for QImage
+            img_array = np.ascontiguousarray(img_array)
             
             # Convert to QImage
             if len(img_array.shape) == 2:  # Grayscale
                 height, width = img_array.shape
-                qimage = QImage(img_array.data, width, height, width, QImage.Format_Grayscale8)
+                # Apply colormap for better visualization
+                img_colored = cv2.applyColorMap(img_array, cv2.COLORMAP_JET)
+                img_colored = cv2.cvtColor(img_colored, cv2.COLOR_BGR2RGB)
+                bytes_per_line = 3 * width
+                qimage = QImage(img_colored.data.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
             else:  # RGB
-                height, width, channels = img_array.shape
-                bytes_per_line = channels * width
-                qimage = QImage(img_array.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                if img_array.shape[2] == 1:
+                    img_array = img_array.squeeze(2)
+                    # Apply colormap
+                    img_colored = cv2.applyColorMap(img_array, cv2.COLORMAP_JET)
+                    img_colored = cv2.cvtColor(img_colored, cv2.COLOR_BGR2RGB)
+                    height, width, _ = img_colored.shape
+                    bytes_per_line = 3 * width
+                    qimage = QImage(img_colored.data.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
+                else:
+                    height, width, channels = img_array.shape
+                    bytes_per_line = channels * width
+                    qimage = QImage(img_array.data.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
             
             pixmap = QPixmap.fromImage(qimage)
             scaled_pixmap = pixmap.scaled(label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
