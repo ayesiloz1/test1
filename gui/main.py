@@ -473,7 +473,7 @@ class WeldDefectGUI(QMainWindow):
         defect_layout.addWidget(self.lbl_defect_detection, alignment=Qt.AlignCenter)
         
         # Info label for Results tab
-        self.lbl_info_results = QLabel("Combined visualization with GradCAM overlay - Green box marks detected anomaly region")
+        self.lbl_info_results = QLabel("CNN GradCAM overlay (red/yellow = attention) + AE bounding box (green = anomaly region)")
         self.lbl_info_results.setAlignment(Qt.AlignCenter)
         self.lbl_info_results.setStyleSheet("color: #aaa; font-size: 20px; padding: 5px;")
         self.lbl_info_results.setWordWrap(True)
@@ -1339,8 +1339,8 @@ class WeldDefectGUI(QMainWindow):
                 gradcam_color = cv2.cvtColor(gradcam_color, cv2.COLOR_BGR2RGB) / 255.0
                 combined = combined * 0.6 + gradcam_color * 0.4
             
-            # Apply Anomaly heatmap overlay if available (Autoencoder - Unsupervised)
-            bounding_box = None
+            # Calculate bounding box from AE anomaly heatmap (NO overlay, just bounding box)
+            bounding_boxes = []
             if result['autoencoder'] and result['autoencoder'].get('heatmap') is not None:
                 ae_heatmap = result['autoencoder']['heatmap']
                 if hasattr(ae_heatmap, 'numpy'):
@@ -1349,24 +1349,25 @@ class WeldDefectGUI(QMainWindow):
                 # Resize to match image
                 ae_heatmap = cv2.resize(ae_heatmap, (224, 224))
                 
-                # Normalize
-                ae_heatmap = (ae_heatmap - ae_heatmap.min()) / (ae_heatmap.max() - ae_heatmap.min() + 1e-8)
-                
-                # Create colored heatmap (use different colormap to distinguish from GradCAM)
-                ae_color = cv2.applyColorMap(np.uint8(255 * ae_heatmap), cv2.COLORMAP_HOT)
-                ae_color = cv2.cvtColor(ae_color, cv2.COLOR_BGR2RGB) / 255.0
-                combined = combined * 0.7 + ae_color * 0.3
-                
-                # Calculate bounding box from anomaly heatmap
-                threshold = 0.5
+                # Use percentile-based threshold to find high-error regions
+                # This captures the top 10% highest error pixels
+                threshold = np.percentile(ae_heatmap, 90)
                 binary_mask = (ae_heatmap > threshold).astype(np.uint8)
+                
+                # Morphological operations to clean up the mask
+                kernel = np.ones((3, 3), np.uint8)
+                binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+                binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
+                
                 contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 
                 if contours:
-                    # Get the largest contour
-                    largest_contour = max(contours, key=cv2.contourArea)
-                    x, y, w, h = cv2.boundingRect(largest_contour)
-                    bounding_box = (x, y, w, h)
+                    # Get all significant contours (larger than 20 pixels)
+                    for contour in contours:
+                        area = cv2.contourArea(contour)
+                        if area > 20:  # Filter out tiny noise
+                            x, y, w, h = cv2.boundingRect(contour)
+                            bounding_boxes.append((x, y, w, h))
             
             # Convert to uint8
             combined = np.clip(combined * 255, 0, 255).astype(np.uint8)
@@ -1374,15 +1375,26 @@ class WeldDefectGUI(QMainWindow):
             # Resize for display
             combined = cv2.resize(combined, (600, 600))
             
-            # Draw bounding box if detected
-            if bounding_box:
-                x, y, w, h = bounding_box
-                # Scale bounding box to display size
+            # Draw bounding boxes if detected
+            if bounding_boxes:
                 scale = 600 / 224
-                x, y, w, h = int(x * scale), int(y * scale), int(w * scale), int(h * scale)
-                cv2.rectangle(combined, (x, y), (x + w, y + h), (0, 255, 0), 3)
-                cv2.putText(combined, "Anomaly Region", (x, y - 10), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                for i, (x, y, w, h) in enumerate(bounding_boxes):
+                    # Scale bounding box to display size
+                    x_scaled = int(x * scale)
+                    y_scaled = int(y * scale)
+                    w_scaled = int(w * scale)
+                    h_scaled = int(h * scale)
+                    
+                    # Draw rectangle
+                    cv2.rectangle(combined, (x_scaled, y_scaled), 
+                                (x_scaled + w_scaled, y_scaled + h_scaled), 
+                                (0, 255, 0), 2)
+                    
+                    # Add label for the largest box
+                    if i == 0 and len(bounding_boxes) > 0:
+                        cv2.putText(combined, "Anomaly Region", 
+                                  (x_scaled, max(y_scaled - 10, 20)), 
+                                  cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             
             # Prepare detection results text for the summary label
             summary_lines = []
