@@ -431,7 +431,7 @@ def load_model(model_path, model_type='auto'):
     print(f"Loading model from: {model_path}")
     
     # Load checkpoint
-    checkpoint = torch.load(model_path, map_location=Config.DEVICE)
+    checkpoint = torch.load(model_path, map_location=Config.DEVICE, weights_only=True)
     
     # Try to detect model type if auto
     if model_type == 'auto':

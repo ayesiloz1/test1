@@ -29,6 +29,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 from model import CAE, CAELarge, CAESmall, CAETiny
 from dataset import create_dataloaders, denormalize
 
+# Import security utils for secure model saving
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'gui'))
+try:
+    from security_utils import ModelIntegrityVerifier
+    SECURITY_UTILS_AVAILABLE = True
+except ImportError:
+    SECURITY_UTILS_AVAILABLE = False
+    print("Note: Security utils not available. Model integrity verification disabled.")
+
 
 class SSIMLoss(nn.Module):
     """
@@ -376,21 +385,32 @@ class CAETrainer:
         }
     
     def save_model(self, filename):
-        """Save model checkpoint"""
+        """Save model checkpoint with automatic integrity hash generation"""
         save_path = self.output_dir / filename
-        torch.save({
+        
+        checkpoint_data = {
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'config': vars(self.config),
             'best_val_auc': self.best_val_auc,
             'best_threshold': self.best_threshold,
             'history': self.history
-        }, save_path)
-        print(f"Model saved to {save_path}")
+        }
+        
+        # Save securely with automatic hash generation
+        if SECURITY_UTILS_AVAILABLE:
+            verifier = ModelIntegrityVerifier()
+            verifier.save_pytorch_model(checkpoint_data, str(save_path), is_state_dict=False)
+            print(f"✓ Model saved securely: {save_path}")
+            print(f"✓ Integrity hash: {save_path}.hash")
+        else:
+            torch.save(checkpoint_data, save_path)
+            print(f"Model saved to {save_path}")
+            print(f"⚠ Warning: No integrity hash generated (security_utils not available)")
     
     def load_model(self, filepath):
         """Load model checkpoint"""
-        checkpoint = torch.load(filepath, map_location=self.device)
+        checkpoint = torch.load(filepath, map_location=self.device, weights_only=True)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.best_val_auc = checkpoint.get('best_val_auc', 0)
         self.best_threshold = checkpoint.get('best_threshold', 0)

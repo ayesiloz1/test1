@@ -15,6 +15,26 @@ import seaborn as sns
 import os
 from tqdm import tqdm
 import time
+import sys
+from pathlib import Path
+
+# Add gui directory to path for security utils
+sys.path.append(str(Path(__file__).parent / 'gui'))
+try:
+    from security_utils import ModelIntegrityVerifier
+    SECURITY_UTILS_AVAILABLE = True
+except ImportError:
+    SECURITY_UTILS_AVAILABLE = False
+    print("Note: Security utils not available. Model integrity verification disabled.")
+
+# Add gui directory to path for security utils
+sys.path.append(str(Path(__file__).parent / 'gui'))
+try:
+    from security_utils import ModelIntegrityVerifier
+    SECURITY_UTILS_AVAILABLE = True
+except ImportError:
+    SECURITY_UTILS_AVAILABLE = False
+    print("Note: Security utils not available. Model integrity verification disabled.")
 
 # ============================================================================
 # CONFIGURATION
@@ -467,11 +487,16 @@ class Trainer:
             # Save best model
             if val_acc > self.best_val_acc:
                 self.best_val_acc = val_acc
-                torch.save(self.model.state_dict(), Config.CHECKPOINT_PATH)
-                print(f'✓ Best model saved! (Val Acc: {val_acc:.2f}%)')
+                # Save model securely with automatic hash generation
+                if SECURITY_UTILS_AVAILABLE:
+                    verifier = ModelIntegrityVerifier()
+                    verifier.save_pytorch_model(self.model.state_dict(), Config.CHECKPOINT_PATH)
+                else:
+                    torch.save(self.model.state_dict(), Config.CHECKPOINT_PATH)
+                print(f'✓ Best model saved securely! (Val Acc: {val_acc:.2f}%)')
         
         # Load best model
-        self.model.load_state_dict(torch.load(Config.CHECKPOINT_PATH))
+        self.model.load_state_dict(torch.load(Config.CHECKPOINT_PATH, weights_only=True))
         print(f"\n✓ Training completed! Best validation accuracy: {self.best_val_acc:.2f}%")
     
     def test(self):
@@ -631,9 +656,16 @@ def main():
     print("\n[STEP 5/5] Testing model...")
     test_acc, _, _ = trainer.test()
     
-    # Save model
-    torch.save(model.state_dict(), Config.MODEL_SAVE_PATH)
-    print(f"\n✓ Model saved to {Config.MODEL_SAVE_PATH}")
+    # Save model securely with automatic hash generation
+    if SECURITY_UTILS_AVAILABLE:
+        verifier = ModelIntegrityVerifier()
+        verifier.save_pytorch_model(model.state_dict(), Config.MODEL_SAVE_PATH)
+        print(f"\n✓ Model saved securely to {Config.MODEL_SAVE_PATH}")
+        print(f"✓ Integrity hash: {Config.MODEL_SAVE_PATH}.hash")
+    else:
+        torch.save(model.state_dict(), Config.MODEL_SAVE_PATH)
+        print(f"\n✓ Model saved to {Config.MODEL_SAVE_PATH}")
+        print(f"⚠ Warning: Security utils not available - no integrity hash generated")
     
     print(f"\n{'='*70}")
     print(f"TRAINING COMPLETE!")

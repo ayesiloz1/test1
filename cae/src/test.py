@@ -27,7 +27,7 @@ from dataset import AnomalyDataset, get_transforms, denormalize
 
 def load_model(model_path, device):
     """Load trained CAE model from checkpoint."""
-    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+    checkpoint = torch.load(model_path, map_location=device, weights_only=True)
     
     # Get config from checkpoint
     config = checkpoint.get('config', {})
