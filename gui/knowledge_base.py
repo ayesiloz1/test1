@@ -5,7 +5,6 @@ Handles document embeddings and semantic search using Azure OpenAI
 
 import os
 import json
-import pickle
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 import numpy as np
@@ -38,7 +37,7 @@ class KnowledgeBase:
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(exist_ok=True)
         
-        self.embeddings_file = self.storage_path / "embeddings.pkl"
+        self.embeddings_file = self.storage_path / "embeddings.npy"
         self.documents_file = self.storage_path / "documents.json"
         
         # Load existing data
@@ -54,8 +53,8 @@ class KnowledgeBase:
                     self.documents = json.load(f)
             
             if self.embeddings_file.exists():
-                with open(self.embeddings_file, 'rb') as f:
-                    self.embeddings = pickle.load(f)
+                # Load embeddings from numpy file (secure alternative to pickle)
+                self.embeddings = np.load(self.embeddings_file, allow_pickle=False).tolist()
                     
             print(f"Loaded {len(self.documents)} documents from knowledge base")
         except Exception as e:
@@ -69,8 +68,9 @@ class KnowledgeBase:
             with open(self.documents_file, 'w', encoding='utf-8') as f:
                 json.dump(self.documents, f, indent=2, ensure_ascii=False)
             
-            with open(self.embeddings_file, 'wb') as f:
-                pickle.dump(self.embeddings, f)
+            # Save embeddings using numpy (secure alternative to pickle)
+            if self.embeddings:
+                np.save(self.embeddings_file, np.array(self.embeddings), allow_pickle=False)
                 
             print(f"Saved {len(self.documents)} documents to knowledge base")
         except Exception as e:

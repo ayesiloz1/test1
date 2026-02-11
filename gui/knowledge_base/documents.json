@@ -1,0 +1,465 @@
+[
+  {
+    "content": "# Welding Defect Types\n        \n        ## Cracks (CR)\n        Cracks are linear discontinuities in the weld metal or base material caused by localized stress \n        exceeding the material's strength. They can be hot cracks (occurring during solidification) or \n        cold cracks (occurring after cooling).\n        \n        Causes:\n        - High residual stresses\n        - Rapid cooling rates\n        - Hydrogen embrittlement\n        - Poor joint design\n        - Contaminated base material\n        \n        Severity: CRITICAL - Cracks can propagate and lead to catastrophic failure\n        \n        Detection Methods:\n        - Visual inspection\n        - Dye penetrant testing\n        - Magnetic particle testing\n        - Radiographic testing\n        - Ultrasonic testing\n        \n        ## Lack of Penetration (LP)\n        Lack of penetration occurs when the weld metal fails to extend through the full thickness of \n        the joint, leaving unfused areas at the root.\n        \n        Causes:\n        - Insufficient heat input\n        - Excessive welding speed\n        - Improper joint preparation\n        - Electrode too large\n        - Incorrect electrode angle\n        \n        Severity: HIGH - Significantly reduces joint strength and fatigue resistance\n        \n        ## Porosity (PO)\n        Porosity consists of gas pockets trapped in the solidified weld metal, appearing as rounded \n        or elongated cavities.\n        \n        Causes:\n        - Contaminated base metal or filler\n        - Inadequate shielding gas coverage\n        - Moisture in electrode or flux\n        - Excessive welding speed\n        - Improper gas flow rates\n        \n        Severity: MODERATE to HIGH - Depends on size, distribution, and location\n        \n        Types:\n        - Uniform porosity: Evenly distributed small pores\n        - Cluster porosity: Grouped pores\n        - Linear porosity: Pores in a line\n        - Piping porosity: Elongated tubular cavities\n        \n        ## Normal Welds (ND)\n        Normal welds are defect-free joints that meet all quality standards and specifications.\n        \n        Characteristics:\n        - Complete penetration\n        - Proper bead shape and size\n        - No visible defects\n        - Meets specified mechanical properties\n        - Uniform appearance\n        \n        # Weld Inspection Procedures\n        \n        ## Visual Inspection\n        The first and most common inspection method. Check for:\n        - Surface cracks\n        - Incomplete fusion\n        - Undercut\n        - Overlap\n        - Porosity\n        - Spatter\n        - Proper bead size and shape\n        \n        ## Non-Destructive Testing (NDT)\n        \n        ### Radiographic Testing (RT)\n        Uses X-rays or gamma rays to detect internal defects.\n        Advantages: Permanent record, detects internal defects\n        Limitations: Expensive, safety concerns, trained operators required\n        \n        ### Ultrasonic Testing (UT)\n        Uses high-frequency sound waves to detect defects.\n        Advantages: Deep penetration, portable, no radiation\n        Limitations: Requires coupling medium, operator skill dependent\n        \n        ### Magnetic Particle Testing (MT)\n        Detects surface and near-surface defects in ferromagnetic materials.\n        Advantages: Simple, fast, relatively inexpensive\n        Limitations: Limited to ferromagnetic materials, surface preparation required\n        \n        # Quality Standards\n        \n        ## AWS D1.1 (Structural Welding Code - Steel)\n        - Defines acceptance criteria for various defect types\n        - Specifies inspection methods and procedures\n        - Provides quality control requirements\n        \n        ## ASME Section IX\n        - Covers welding procedure qualifications\n        - Defines welder performance qualifications\n        - Specifies acceptance criteria",
+    "metadata": {
+      "title": "Welding Defect Detection Guide",
+      "category": "welding_knowledge",
+      "source": "default"
+    },
+    "chunk_index": 0,
+    "total_chunks": 1
+  },
+  {
+    "content": "# Welding Inspection Procedures and Standards\n\n## Overview\nThis document provides guidelines for inspecting welded joints in structural steel applications, following AWS D1.1 specifications.\n\n## Pre-Weld Inspection\n\n### Base Material Inspection\n- Verify material certificates and specifications\n- Check for surface defects (rust, mill scale, laminations)\n- Measure material thickness and verify dimensions\n- Ensure proper material storage and handling",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 0,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Joint Preparation\n- Check joint geometry (gap, angle, alignment)\n- Verify edge preparation (bevel angles, root faces)\n- Ensure proper fit-up and tack weld quality\n- Confirm cleanliness (remove oil, grease, moisture)\n\n## During Welding Inspection\n\n### Process Control\n- Monitor welding parameters (voltage, current, travel speed)\n- Verify consumable specifications (electrode type, flux, gas)\n- Check preheat and interpass temperatures\n- Observe welder technique and qualification",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 1,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Environmental Conditions\n- Ambient temperature: minimum 0°F (-18°C) unless preheated\n- Wind protection: shield from drafts exceeding 5 mph\n- Moisture protection: keep joint and electrodes dry\n- Ventilation: adequate but not excessive\n\n## Post-Weld Inspection\n\n### Visual Inspection (VT)\nPrimary inspection method for all welds.",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 2,
+    "total_chunks": 16
+  },
+  {
+    "content": "#### Acceptance Criteria (AWS D1.1):\n- **Cracks**: Not permitted (zero tolerance)\n- **Fusion**: Complete fusion required at all surfaces\n- **Crater cracks**: Not permitted\n- **Undercut**: Maximum 1/32\" (0.8 mm) for non-critical welds\n- **Porosity**: \n  - Maximum size: 3/32\" (2.4 mm)\n  - Maximum cluster: 3 pores within 2\" (50 mm)\n  - Maximum total: 3/8\" (10 mm) in any linear inch\n- **Slag inclusions**: Similar limits to porosity\n- **Weld profile**: \n  - Reinforcement: maximum 1/8\" (3.2 mm)\n  - Concavity: maximum 1/16\" (1.6 mm)",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 3,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Non-Destructive Testing (NDT)\n\n#### Radiographic Testing (RT)\n**Applications:**\n- Critical structural welds\n- Full penetration butt joints\n- Permanent radiographic records required\n\n**Technique:**\n- X-ray or gamma ray source\n- Film or digital detector\n- Source-to-film distance per code requirements\n- Proper exposure for required density (1.8 to 4.0)",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 4,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Interpretation:**\n- Porosity: Rounded indications\n- Slag: Elongated, irregular indications\n- Cracks: Fine, straight or branching lines\n- Lack of fusion/penetration: Straight line indications\n\n**Acceptance:**\nPer AWS D1.1 Table 6.1 (varies by application)\n\n#### Ultrasonic Testing (UT)\n**Applications:**\n- Thick section welds\n- Faster than RT for many applications\n- Can detect laminar defects",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 5,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Technique:**\n- Angle beam or normal beam\n- Frequency: 2-5 MHz typical\n- Calibration on reference block\n- Scan over entire weld area\n\n**Advantages:**\n- Real-time results\n- No radiation safety concerns\n- Depth information\n- Portable equipment\n\n**Limitations:**\n- Operator skill dependent\n- Requires access to both sides\n- Surface preparation critical\n\n#### Magnetic Particle Testing (MT)\n**Applications:**\n- Ferromagnetic materials only\n- Surface and near-surface defects\n- Quick screening method",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 6,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Technique:**\n- Clean surface thoroughly\n- Apply magnetic field (prod, yoke, or coil)\n- Apply magnetic particles (wet or dry)\n- Inspect under proper lighting (white or UV)\n\n**Acceptance:**\n- Linear indications > 1/16\" (1.6 mm): rejectable\n- Clusters of 3+ indications: rejectable\n- Verify all indications (not all are defects)\n\n#### Liquid Penetrant Testing (PT)\n**Applications:**\n- Non-ferromagnetic materials\n- Surface-breaking defects only\n- Simple, low-cost method",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 7,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Procedure:**\n1. Clean surface (remove contaminants)\n2. Apply penetrant (dwell 10-30 minutes)\n3. Remove excess penetrant\n4. Apply developer\n5. Inspect (5-10 minutes dwell)\n\n**Types:**\n- Visible dye penetrant (white light inspection)\n- Fluorescent penetrant (UV light inspection)\n\n**Acceptance:**\nSimilar to MT criteria for linear indications and clusters\n\n## Defect Causes and Prevention\n\n### Cracks",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 8,
+    "total_chunks": 16
+  },
+  {
+    "content": "#### Hot Cracks (Solidification Cracks)\n**Causes:**\n- High sulfur or phosphorus content\n- Excessive restraint\n- Improper filler metal selection\n- High carbon equivalent\n\n**Prevention:**\n- Use low-sulfur base and filler metals\n- Proper joint design to reduce restraint\n- Sequence welding to control stresses\n- Maintain proper preheat\n\n#### Cold Cracks (Hydrogen-Induced Cracking)\n**Causes:**\n- Hydrogen contamination\n- High hardness microstructure\n- Residual tensile stresses\n- Low temperature",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 9,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Prevention:**\n- Use low-hydrogen electrodes (E7018, etc.)\n- Store electrodes properly (heated cabinet)\n- Preheat to slow cooling rate\n- Post-weld heat treatment when required\n- Remove moisture and contaminants\n\n### Porosity\n\n**Causes:**\n- Contaminated base metal (rust, mill scale, oil)\n- Moisture in electrode coating or flux\n- Inadequate gas shielding (GMAW/GTAW)\n- Excessive travel speed\n- Long arc length\n- Improper gas flow rates",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 10,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Prevention:**\n- Thorough cleaning before welding\n- Proper electrode storage and handling\n- Check gas flow rates and coverage\n- Proper welding technique\n- Shield from wind/drafts\n\n### Lack of Penetration (LOP)\n\n**Causes:**\n- Insufficient heat input\n- Excessive welding speed\n- Improper joint preparation\n- Electrode too large\n- Incorrect electrode angle\n- Excessive root gap",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 11,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Prevention:**\n- Proper joint design and preparation\n- Adequate heat input for material thickness\n- Appropriate travel speed\n- Correct electrode size and manipulation\n- Proper root opening and land\n\n### Lack of Fusion (LOF)\n\n**Causes:**\n- Insufficient heat input\n- Improper joint preparation\n- Contaminated surfaces\n- Incorrect electrode angle\n- Excessive travel speed",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 12,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Prevention:**\n- Clean joint surfaces thoroughly\n- Proper welding parameters\n- Correct electrode angle and manipulation\n- Remove slag between passes\n\n## Quality Assurance\n\n### Documentation Requirements\n- Weld maps showing all welds\n- Visual inspection reports\n- NDT reports and radiographs\n- Material certifications\n- Welding procedure specifications (WPS)\n- Procedure qualification records (PQR)\n- Welder qualification records (WQR)",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 13,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Acceptance/Rejection\n- All defects evaluated per applicable code\n- Repair procedures must be qualified\n- Maximum number of repairs may be limited\n- Document all repairs and re-inspection\n\n### Repair Procedures\n1. Remove defective weld metal completely\n2. Prepare surfaces properly\n3. Re-weld using qualified procedure\n4. Re-inspect using same or more stringent method\n5. Document repair",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 14,
+    "total_chunks": 16
+  },
+  {
+    "content": "## References\n- AWS D1.1: Structural Welding Code - Steel\n- ASME Section IX: Welding and Brazing Qualifications\n- AWS B1.10: Guide for the Nondestructive Inspection of Welds\n- AWS QC1: Standard for AWS Certification of Welding Inspectors",
+    "metadata": {
+      "source": "sample_welding_procedures.txt",
+      "filename": "sample_welding_procedures.txt"
+    },
+    "chunk_index": 15,
+    "total_chunks": 16
+  },
+  {
+    "content": "# RIAWELC System Architecture - CNN Classifier\n\n## Overview\nThe CNN (Convolutional Neural Network) Classifier is a supervised deep learning model that classifies welding X-ray images into four categories: CR (Cracks), LP (Lack of Penetration), PO (Porosity), and ND (No Defect).\n\n## Model Architecture\n\n### SimpleCNN (Baseline Model)\nA lightweight CNN with 3 convolutional blocks:",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 0,
+    "total_chunks": 11
+  },
+  {
+    "content": "**Architecture:**\n- **Block 1:** Conv(3→32) → BatchNorm → ReLU → Conv(32→32) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.25)\n- **Block 2:** Conv(32→64) → BatchNorm → ReLU → Conv(64→64) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.25)\n- **Block 3:** Conv(64→128) → BatchNorm → ReLU → Conv(128→128) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.25)\n- **Classifier:** Flatten → FC(128×28×28→256) → BatchNorm → ReLU → Dropout(0.5) → FC(256→128) → BatchNorm → ReLU → Dropout(0.5) → FC(128→4)",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 1,
+    "total_chunks": 11
+  },
+  {
+    "content": "**Parameters:** ~13M trainable parameters\n**Input:** 224×224×3 RGB images\n**Output:** 4-class probability distribution\n\n### DeepCNN (Production Model)\nA deeper architecture with 5 convolutional blocks for improved accuracy:",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 2,
+    "total_chunks": 11
+  },
+  {
+    "content": "**Architecture:**\n- **Block 1:** Conv(3→32) → BatchNorm → ReLU → Conv(32→32) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.2)\n- **Block 2:** Conv(32→64) → BatchNorm → ReLU → Conv(64→64) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.2)\n- **Block 3:** Conv(64→128) → BatchNorm → ReLU → Conv(128→128) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.3)\n- **Block 4:** Conv(128→256) → BatchNorm → ReLU → Conv(256→256) → BatchNorm → ReLU → MaxPool(2×2) → Dropout(0.3)\n- **Block 5:** Conv(256→512) → BatchNorm → ReLU → Conv(512→512) → BatchNorm → ReLU → AdaptiveAvgPool(1×1) → Dropout(0.4)\n- **Classifier:** Flatten → FC(512→512) → BatchNorm → ReLU → Dropout(0.5) → FC(512→256) → BatchNorm → ReLU → Dropout(0.5) → FC(256→4)",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 3,
+    "total_chunks": 11
+  },
+  {
+    "content": "**Parameters:** ~25M trainable parameters\n**Input:** 224×224×3 RGB images\n**Output:** 4-class probability distribution (logits)\n\n## Training Configuration\n\n### Hyperparameters\n- **Image Size:** 224×224 pixels\n- **Batch Size:** 32\n- **Epochs:** 30\n- **Learning Rate:** 0.001 (Adam optimizer)\n- **Weight Decay:** 1e-4 (L2 regularization)\n- **Loss Function:** CrossEntropyLoss\n- **Optimizer:** Adam with weight decay",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 4,
+    "total_chunks": 11
+  },
+  {
+    "content": "### Data Augmentation (Training Only)\n- Random horizontal flip\n- Random vertical flip  \n- Random rotation (±30°)\n- Random translation (±30%)\n- Color jitter (brightness ±20%, contrast ±20%)\n- ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])\n\n### Validation/Test Preprocessing\n- Resize to 224×224\n- ImageNet normalization (no augmentation)",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 5,
+    "total_chunks": 11
+  },
+  {
+    "content": "## Dataset Structure\n```\ndataset/\n├── training/    # Training set\n│   ├── CR/     # Crack images\n│   ├── LP/     # Lack of Penetration images\n│   ├── ND/     # No Defect (normal) images\n│   └── PO/     # Porosity images\n├── validation/  # Validation set (same structure)\n└── testing/     # Test set (same structure)\n```",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 6,
+    "total_chunks": 11
+  },
+  {
+    "content": "## Performance Metrics\nThe CNN classifier is evaluated using:\n- **Accuracy:** Overall classification accuracy\n- **Precision:** True positives / (True positives + False positives) per class\n- **Recall:** True positives / (True positives + False negatives) per class\n- **F1-Score:** Harmonic mean of precision and recall\n- **Confusion Matrix:** Visual representation of predictions vs ground truth",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 7,
+    "total_chunks": 11
+  },
+  {
+    "content": "## Key Features\n- **BatchNormalization:** Stabilizes training and improves convergence\n- **Dropout Regularization:** Prevents overfitting (rates: 0.2-0.5)\n- **Adaptive Pooling:** Makes model robust to varying input resolutions\n- **Multi-GPU Support:** Can utilize CUDA for faster training\n- **Checkpoint Saving:** Best model saved based on validation accuracy",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 8,
+    "total_chunks": 11
+  },
+  {
+    "content": "## Model Files\n- **weld_defect_pytorch.pth:** Final trained model after all epochs\n- **best_model_pytorch.pth:** Best model checkpoint (highest validation accuracy)\n\n## Inference Usage\nThe CNN classifier provides:\n1. **Predicted Class:** CR, LP, ND, or PO\n2. **Confidence Score:** Probability of predicted class (0-1)\n3. **All Class Probabilities:** Softmax probabilities for all 4 classes",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 9,
+    "total_chunks": 11
+  },
+  {
+    "content": "## Integration with Autoencoder\nThe CNN works in a hybrid system:\n- **Autoencoder (CAE):** Detects if image is anomalous (defect or not)\n- **CNN Classifier:** Identifies specific defect type if anomaly detected\n- **Combined Decision:** Uses both models for robust classification",
+    "metadata": {
+      "source": "docs_cnn_architecture.txt",
+      "filename": "docs_cnn_architecture.txt"
+    },
+    "chunk_index": 10,
+    "total_chunks": 11
+  },
+  {
+    "content": "# RIAWELC System Architecture - Convolutional Autoencoder (CAE)\n\n## Overview\nThe Convolutional Autoencoder (CAE) is an unsupervised anomaly detection model that learns to reconstruct normal (defect-free) weld images. Defective welds produce high reconstruction errors, enabling anomaly detection without requiring labeled defect data.",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 0,
+    "total_chunks": 16
+  },
+  {
+    "content": "## Core Principle\n**Training:** Model learns to reconstruct only normal (ND - No Defect) images\n**Inference:** Defective images (CR, LP, PO) cannot be reconstructed accurately → High reconstruction error → Anomaly detected\n\n## Model Architecture\n\n### CAE (Standard Model)\nA 3-block encoder-decoder architecture with symmetric structure:",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 1,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Encoder:**\n- **Block 1:** Conv(3→32) × 2 + BatchNorm + ReLU → MaxPool(2×2) [224 → 112]\n- **Block 2:** Conv(32→64) × 2 + BatchNorm + ReLU → MaxPool(2×2) [112 → 56]\n- **Block 3:** Conv(64→128) × 2 + BatchNorm + ReLU → MaxPool(2×2) [56 → 28]\n- **Bottleneck:** Conv(128→128) × 2 + BatchNorm + ReLU [28 × 28 × 128 latent space]",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 2,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Decoder:**\n- **Block 3:** ConvTranspose(128→128) + Conv(128→128) + BatchNorm + ReLU [28 → 56]\n- **Block 2:** ConvTranspose(128→64) + Conv(64→64) + BatchNorm + ReLU [56 → 112]\n- **Block 1:** ConvTranspose(64→32) + Conv(32→32) + BatchNorm + ReLU [112 → 224]\n- **Output:** Conv(32→3) [224 × 224 × 3 reconstruction]\n\n**Latent Dimension:** 128 (28 × 28 × 128 feature map)\n**Parameters:** ~8M trainable parameters\n**Input/Output:** 224×224×3 RGB images",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 3,
+    "total_chunks": 16
+  },
+  {
+    "content": "### CAELarge (High-Capacity Model)\nA larger architecture with 5 encoder/decoder blocks for complex patterns:\n\n**Encoder:**\n- **Block 1:** Conv(3→64, stride=2) + BatchNorm + LeakyReLU [224 → 112]\n- **Block 2:** Conv(64→128, stride=2) + BatchNorm + LeakyReLU [112 → 56]\n- **Block 3:** Conv(128→256, stride=2) + BatchNorm + LeakyReLU [56 → 28]\n- **Block 4:** Conv(256→512, stride=2) + BatchNorm + LeakyReLU [28 → 14]\n- **Block 5:** Conv(512→256, stride=2) + BatchNorm + LeakyReLU [14 → 7]",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 4,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Decoder:**\n- **Block 1:** ConvTranspose(256→512, stride=2) + BatchNorm + ReLU [7 → 14]\n- **Block 2:** ConvTranspose(512→256, stride=2) + BatchNorm + ReLU [14 → 28]\n- **Block 3:** ConvTranspose(256→128, stride=2) + BatchNorm + ReLU [28 → 56]\n- **Block 4:** ConvTranspose(128→64, stride=2) + BatchNorm + ReLU [56 → 112]\n- **Block 5:** ConvTranspose(64→3, stride=2) [112 → 224]",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 5,
+    "total_chunks": 16
+  },
+  {
+    "content": "**Latent Dimension:** 256 (7 × 7 × 256 feature map)\n**Parameters:** ~18M trainable parameters\n**Input/Output:** 224×224×3 RGB images\n\n## Training Configuration\n\n### Hyperparameters\n- **Image Size:** 224×224 pixels\n- **Batch Size:** 16\n- **Epochs:** 50\n- **Learning Rate:** 0.0001 (Adam optimizer)\n- **Loss Function:** Mean Squared Error (MSE) between input and reconstruction\n- **Optimizer:** Adam",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 6,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Training Data\n**Only normal (ND) images are used for training:**\n```\ncae/dataset/training/normal/  # Contains only defect-free weld images\n```\n\n**Validation Split:**\n- Normal images: To validate reconstruction quality\n- Defect images (CR, LP, PO): To validate anomaly detection capability\n\n### Data Preprocessing\n- Resize to 224×224\n- ImageNet normalization (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])\n- No data augmentation (reconstructs original patterns)",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 7,
+    "total_chunks": 16
+  },
+  {
+    "content": "## Anomaly Detection Methodology\n\n### Reconstruction Error Calculation\n```python\nerror = MSE(input_image, reconstructed_image)\nerror = mean((input - reconstruction)^2)\n```\n\n### Threshold Selection\n- **Training Phase:** Calculate reconstruction errors on validation normal images\n- **Threshold:** Set at 95th percentile of normal image errors\n- **Default Threshold:** 0.018 (determined empirically)\n- **Anomaly Decision:** If error > threshold → Anomaly (defect detected)",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 8,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Error Types\n1. **Mean Error (scalar):** Single value representing overall reconstruction quality\n2. **Pixel-wise Error (heatmap):** Spatial map showing which regions failed to reconstruct\n\n## Performance Metrics\n\n### Reconstruction Quality\n- **Mean Squared Error (MSE):** Primary loss function\n- **Peak Signal-to-Noise Ratio (PSNR):** Quality of reconstruction\n- **Structural Similarity Index (SSIM):** Perceptual similarity",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 9,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Anomaly Detection\n- **ROC-AUC:** Receiver Operating Characteristic curve area\n- **True Positive Rate:** % of defects correctly identified as anomalies\n- **False Positive Rate:** % of normal welds incorrectly flagged as anomalies\n- **F1-Score:** Balance between precision and recall\n\n## Model Files\n- **best_model.pth:** Best performing model (lowest validation loss)\n- **checkpoint_epoch_N.pth:** Periodic checkpoints every 10 epochs\n\n## Key Features",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 10,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Advantages\n- **No Labeled Defects Needed:** Trains only on normal images\n- **Detects Novel Defects:** Can identify defect types not seen during training\n- **Interpretable:** High error regions indicate defect locations\n- **Robust to Class Imbalance:** Works when defect data is scarce",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 11,
+    "total_chunks": 16
+  },
+  {
+    "content": "### Limitations\n- **Threshold Sensitivity:** Performance depends on proper threshold tuning\n- **No Defect Classification:** Only detects anomalies, doesn't classify type\n- **Normal Variation:** May flag unusual but acceptable welds as defects",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 12,
+    "total_chunks": 16
+  },
+  {
+    "content": "## Integration with CNN Classifier\nThe CAE works as first-stage anomaly detector:\n1. **CAE:** Is this image anomalous? (Yes/No + reconstruction error)\n2. **CNN Classifier:** If anomalous, what type of defect? (CR/LP/PO)\n3. **Hybrid Decision:** Combines both models for robust classification",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 13,
+    "total_chunks": 16
+  },
+  {
+    "content": "## Inference Usage\nThe CAE provides:\n1. **Is Anomaly:** Boolean flag (error > threshold)\n2. **Reconstruction Error:** Numerical error value (0-1 range typically)\n3. **Threshold:** Current detection threshold\n4. **Reconstructed Image:** Visual comparison for interpretation\n5. **Error Heatmap:** Spatial visualization of anomalous regions",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 14,
+    "total_chunks": 16
+  },
+  {
+    "content": "## Visualization\n- **Side-by-side Comparison:** Original vs Reconstructed image\n- **Error Heatmap:** Red regions indicate high reconstruction error (potential defects)\n- **Error Distribution:** Histogram of reconstruction errors for batch analysis",
+    "metadata": {
+      "source": "docs_cae_architecture.txt",
+      "filename": "docs_cae_architecture.txt"
+    },
+    "chunk_index": 15,
+    "total_chunks": 16
+  },
+  {
+    "content": "# Detection Results Summary\n\n**Export Date:** 2026-02-03T00:37:23.597429\n\n## Batch Analysis Statistics\n\n- **Total Images Processed:** 290\n- **Defects Found:** 290\n- **Average Confidence:** 63.31%\n- **Average Processing Time:** 0.310s\n\n### Class Distribution\n- **Unknown:** 290 images (100.0%)\n\n## Individual Detection Results\n\n### Image 1: \n- **Final Decision:** Unknown\n- **CNN Prediction:** PO (confidence: 78.37%)\n- **Autoencoder:** Anomaly detected (error: 0.0000)\n- **Processing Time:** 0.149s",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 0,
+    "total_chunks": 6
+  },
+  {
+    "content": "### Image 2: \n- **Final Decision:** Unknown\n- **CNN Prediction:** PO (confidence: 58.52%)\n- **Autoencoder:** Normal (error: 0.0000)\n- **Processing Time:** 0.109s\n\n### Image 3: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 52.83%)\n- **Autoencoder:** Anomaly detected (error: 0.0000)\n- **Processing Time:** 0.114s",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 1,
+    "total_chunks": 6
+  },
+  {
+    "content": "### Image 4: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 57.87%)\n- **Autoencoder:** Anomaly detected (error: 0.0000)\n- **Processing Time:** 0.120s\n\n### Image 5: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 54.79%)\n- **Autoencoder:** Normal (error: 0.0000)\n- **Processing Time:** 0.116s",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 2,
+    "total_chunks": 6
+  },
+  {
+    "content": "### Image 6: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 36.83%)\n- **Autoencoder:** Anomaly detected (error: 0.0000)\n- **Processing Time:** 0.123s\n\n### Image 7: \n- **Final Decision:** Unknown\n- **CNN Prediction:** CR (confidence: 51.67%)\n- **Autoencoder:** Anomaly detected (error: 0.0000)\n- **Processing Time:** 0.119s",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 3,
+    "total_chunks": 6
+  },
+  {
+    "content": "### Image 8: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 58.52%)\n- **Autoencoder:** Normal (error: 0.0000)\n- **Processing Time:** 0.120s\n\n### Image 9: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 48.86%)\n- **Autoencoder:** Normal (error: 0.0000)\n- **Processing Time:** 0.083s\n\n### Image 10: \n- **Final Decision:** Unknown\n- **CNN Prediction:** LP (confidence: 57.15%)\n- **Autoencoder:** Normal (error: 0.0000)\n- **Processing Time:** 0.117s",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 4,
+    "total_chunks": 6
+  },
+  {
+    "content": "*... and 280 more results*",
+    "metadata": {
+      "title": "Detection Results 2026-02-03 00:37",
+      "category": "detection_results",
+      "source": "export",
+      "file_path": "C:/Personal_Projects/RIAWELC/gui/weld_detection_results_20260203_003721.json"
+    },
+    "chunk_index": 5,
+    "total_chunks": 6
+  }
+]

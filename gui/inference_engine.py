@@ -18,6 +18,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / 'cae' / 'src'))
 
 from train_pytorch import SimpleCNN
+from security_utils import ModelIntegrityVerifier
 
 # Try to import new CAE models
 try:
@@ -112,8 +113,14 @@ class DefectDetectionEngine:
             if not Path(cnn_path).exists():
                 print(f"Warning: CNN model not found at {cnn_path}")
                 return
-                
-            checkpoint = torch.load(cnn_path, map_location=self.device, weights_only=False)
+            
+            # Verify model integrity
+            verifier = ModelIntegrityVerifier()
+            try:
+                verifier.verify_model(cnn_path, raise_on_failure=False)
+            except Exception as e:
+                print(f"Warning: Could not verify model integrity: {e}")
+                            # Load with weights_only=True for security            checkpoint = torch.load(cnn_path, map_location=self.device, weights_only=True)
             
             self.cnn_model = SimpleCNN(num_classes=4)
             
@@ -146,7 +153,7 @@ class DefectDetectionEngine:
                 print(f"Warning: CAE model not found at {ae_path}")
                 return
                 
-            checkpoint = torch.load(ae_path, map_location=self.device, weights_only=False)
+            checkpoint = torch.load(ae_path, map_location=self.device, weights_only=True)
             
             # Get config from checkpoint
             config = checkpoint.get('config', {})

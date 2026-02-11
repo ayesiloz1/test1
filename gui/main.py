@@ -21,6 +21,7 @@ from widgets import ControlPanel, ImageViewer, ResultsPanel
 from utils import display_tensor_image, display_numpy_image, create_defect_detection_view
 from inference_engine import DefectDetectionEngine
 from config import GUIConfig
+from security_utils import validate_file_upload, validate_path_safety, sanitize_filename
 
 
 class WeldDefectGUI(QMainWindow):
@@ -235,27 +236,66 @@ class WeldDefectGUI(QMainWindow):
             QMessageBox.critical(self, "Error", f"Failed to load models:\n{str(e)}")
     
     def load_image(self):
-        """Load single image"""
+        """Load single image with validation"""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Image", "",
             "Images (*.png *.jpg *.jpeg *.bmp *.tif *.tiff)"
         )
         
         if file_path:
+            # Validate file upload
+            is_valid, error_msg = validate_file_upload(
+                file_path,
+                allowed_extensions=['.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff'],
+                max_size_mb=10,
+                check_content=True
+            )
+            
+            if not is_valid:
+                QMessageBox.critical(
+                    self, "Invalid File", 
+                    f"File validation failed: {error_msg}"
+                )
+                self.results_panel.log_message(f"✗ Validation failed: {error_msg}")
+                return
+            
+            # Additional path safety check
+            try:
+                file_path_obj = Path(file_path).resolve()
+                if not file_path_obj.exists():
+                    raise FileNotFoundError("File does not exist")
+            except Exception as e:
+                QMessageBox.critical(
+                    self, "Invalid Path",
+                    f"Path validation failed: {str(e)}"
+                )
+                return
+            
             self.current_image_path = file_path
             self.display_image(file_path)
             self.control_panel.btn_analyze.setEnabled(True)
-            self.results_panel.log_message(f"Loaded: {Path(file_path).name}")
+            self.results_panel.log_message(f"✓ Loaded: {Path(file_path).name}")
             self.status_bar.showMessage(f"Image loaded: {Path(file_path).name}")
     
     def load_folder(self):
-        """Load folder for batch processing"""
+        """Load folder for batch processing with validation"""
         folder_path = QFileDialog.getExistingDirectory(
             self, "Select Folder (with CR, LP, ND, PO subfolders)"
         )
         
         if folder_path:
-            folder = Path(folder_path)
+            # Validate folder path
+            try:
+                folder = Path(folder_path).resolve()
+                if not folder.exists() or not folder.is_dir():
+                    raise ValueError("Invalid folder path")
+            except Exception as e:
+                QMessageBox.critical(
+                    self, "Invalid Folder",
+                    f"Folder validation failed: {str(e)}"
+                )
+                return
+            
             self.image_list = []
             self.batch_results_cache = {}
             

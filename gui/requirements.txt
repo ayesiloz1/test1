@@ -1,14 +1,24 @@
 """
-PyQt5 GUI requirements
+PyQt5 GUI requirements - Pinned versions for security
 """
 
-PyQt5>=5.15.0
-torch>=2.0.0
-torchvision>=0.15.0
-numpy>=1.21.0
-opencv-python>=4.5.0
-Pillow>=9.0.0
+# GUI Framework
+PyQt5==5.15.10
+
+# Deep Learning
+torch==2.1.2
+torchvision==0.16.2
+
+# Core Dependencies
+numpy==1.26.3
+opencv-python==4.9.0.80
+Pillow==10.2.0
 
 # LLM Integration with Azure OpenAI
-openai>=1.0.0
-python-dotenv>=0.19.0
+openai==1.10.0
+python-dotenv==1.0.1
+
+# Additional Security Note:
+# For production deployment with hash verification, use:
+# pip install --require-hashes -r requirements.txt
+# Then generate hashes with: pip-compile --generate-hashes requirements.in

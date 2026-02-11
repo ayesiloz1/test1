@@ -27,7 +27,7 @@ def extract_cnn_metrics():
         return None
     
     # Load checkpoint
-    checkpoint = torch.load(model_path, map_location='cpu')
+    checkpoint = torch.load(model_path, map_location='cpu', weights_only=True)
     
     # Extract metrics if they were saved
     metrics = {}
